@@ -2,52 +2,60 @@
 
 ## 策略名稱
 
-Nisk 5-Minute Support Resistance Strategy
+Nisk MA Cross Strategy v0.1
 
 ## 使用週期
 
 - 主要週期：5 分鐘 K 線
 - 初期商品：期貨商品，先以微型台指或台指期為主要觀察對象
 
-## 核心概念
+## 第一版核心策略
 
-交易不是猜方向，而是等待價格走到關鍵位置後，再確認市場是否接受這個方向。
+第一版先使用 20MA 與 60MA 判斷多空方向。
 
-初始策略會從三個狀態開始：
+這一版的重點不是追求複雜，而是先建立可以設定、可以回測、可以解釋的策略架構。
 
-1. 支撐成立
-2. 壓力成立
-3. 突破或跌破後回踩確認
+## 均線定義
 
-## 多單條件草案
+- fast_ma: 20
+- slow_ma: 60
+- ma_type: SMA
 
-允許做多需要同時滿足：
+未來可改為 EMA 或其他均線，但第一版先使用簡單移動平均線 SMA。
 
-- 價格接近或站上支撐區
-- 前低沒有被有效跌破
-- 出現反彈 K 棒或突破 K 棒
-- 成交量沒有明顯失控
-- 進場價到停損價的風險可接受
-- 目標價至少達到 1:2 風報比
+## 金叉定義
 
-## 空單條件草案
+當 20MA 從下方穿越 60MA 到上方，定義為金叉。
 
-允許做空需要同時滿足：
+條件：
 
-- 價格接近或跌破壓力區
-- 前高沒有被有效突破
-- 出現轉弱 K 棒或跌破 K 棒
-- 成交量沒有明顯失控
-- 進場價到停損價的風險可接受
-- 目標價至少達到 1:2 風報比
+```text
+previous_20ma <= previous_60ma
+current_20ma > current_60ma
+```
+
+金叉後，策略狀態偏多。
+
+## 死叉定義
+
+當 20MA 從上方穿越 60MA 到下方，定義為死叉。
+
+條件：
+
+```text
+previous_20ma >= previous_60ma
+current_20ma < current_60ma
+```
+
+死叉後，策略狀態偏空。
 
 ## 訊號輸出
 
 策略引擎只輸出三種狀態：
 
-- LONG：偏多訊號
-- SHORT：偏空訊號
-- WAIT：觀望
+- LONG：20MA 金叉 60MA
+- SHORT：20MA 死叉 60MA
+- WAIT：沒有交叉訊號
 
 每一個訊號都必須包含：
 
@@ -60,6 +68,27 @@ Nisk 5-Minute Support Resistance Strategy
 - risk_reward_ratio
 - reason
 
+## 策略設定檔方向
+
+策略不要寫死在 Python 裡，未來要透過設定檔控制，例如：
+
+```yaml
+strategy:
+  name: nisk_ma_cross_v0_1
+  timeframe: 5m
+  indicators:
+    moving_average_cross:
+      ma_type: SMA
+      fast_period: 20
+      slow_period: 60
+  signal:
+    golden_cross: LONG
+    death_cross: SHORT
+    no_cross: WAIT
+```
+
+這樣未來要測試 5/20、10/60、20/120 或 EMA，只需要改設定檔，不需要重寫策略程式。
+
 ## 暫不處理
 
 第一版先不處理：
@@ -69,3 +98,13 @@ Nisk 5-Minute Support Resistance Strategy
 - 複雜技術指標堆疊
 - 高頻交易
 - 無停損策略
+
+## 下一步
+
+Codex 優先實作：
+
+1. Moving average calculator
+2. MA cross detector
+3. Strategy config loader
+4. Signal model
+5. Unit tests
