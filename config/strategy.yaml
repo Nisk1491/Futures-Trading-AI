@@ -1,0 +1,12 @@
+strategy:
+  name: nisk_ma_cross_v0_1
+  timeframe: 5m
+  indicators:
+    moving_average_cross:
+      ma_type: SMA
+      fast_period: 20
+      slow_period: 60
+  signal:
+    golden_cross: LONG
+    death_cross: SHORT
+    no_cross: WAIT
