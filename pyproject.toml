@@ -1,0 +1,17 @@
+[project]
+name = "futures-trading-ai"
+version = "0.1.0"
+description = "AI-assisted futures trading research system"
+requires-python = ">=3.11"
+dependencies = [
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
